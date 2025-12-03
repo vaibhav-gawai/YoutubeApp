@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>YouTube Web App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- Basic styles -->
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .card {
+      max-width: 420px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 0.75rem;
+    }
+    p {
+      opacity: 0.8;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    .hint {
+      font-size: 0.9rem;
+      opacity: 0.6;
+      margin-top: 0.75rem;
+    }
+  </style>
+
+  <script>
+    // Register service worker for PWA installability
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/sw.js')
+          .catch(err => console.error('SW registration failed', err));
+      });
+    }
+
+    // When opened as installed app, redirect to YouTube
+    window.addEventListener('load', () => {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+
+      if (isStandalone) {
+        // Open mobile YouTube
+        window.location.replace('https://m.youtube.com/');
+      }
+    });
+  </script>
+</head>
+<body>
+  <main class="card">
+    <h1>YouTube Web App</h1>
+    <p>
+      This is a lightweight PWA wrapper for YouTube.<br />
+      Install it on your Android device to open YouTube in its own app-like window.
+    </p>
+    <p class="hint">
+      In Chrome on Android: open this site → menu (⋮) → <b>Install app</b> or <b>Add to Home screen</b>.
+    </p>
+  </main>
+</body>
+</html>
