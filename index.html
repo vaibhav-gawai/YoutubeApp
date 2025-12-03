@@ -1,125 +1,262 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>YouTube Web App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-
-    <!-- PWA manifest -->
-    <link rel="manifest" href="/manifest.json" />
-
-    <!-- Optional icons for better install UX -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube PWA</title>
+    <meta name="description" content="YouTube Progressive Web App">
+    <meta name="theme-color" content="#ff0000">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      }
-
-      body {
-        background: radial-gradient(circle at top, #202020 0, #000 55%);
-        color: #fff;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-      }
-
-      .card {
-        max-width: 420px;
-        width: 100%;
-        text-align: center;
-        padding: 1.75rem 1.5rem;
-        border-radius: 1.25rem;
-        background: rgba(20, 20, 20, 0.9);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      h1 {
-        font-size: 1.7rem;
-        margin-bottom: 0.6rem;
-      }
-
-      p {
-        opacity: 0.85;
-        margin-bottom: 0.75rem;
-        line-height: 1.4;
-        font-size: 0.98rem;
-      }
-
-      .hint {
-        font-size: 0.86rem;
-        opacity: 0.65;
-        margin-top: 0.4rem;
-      }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.8rem;
-        padding: 0.25rem 0.7rem;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
-        margin-bottom: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-
-      .dot {
-        width: 0.5rem;
-        height: 0.5rem;
-        border-radius: 999px;
-        background: #ff0000;
-      }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f9f9f9;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: #ff0000;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .install-btn {
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .install-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .search-bar {
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: #ff0000;
+        }
+        
+        .iframe-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 768px) {
+            .logo-text {
+                font-size: 18px;
+            }
+            
+            header {
+                padding: 12px 15px;
+            }
+        }
     </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">▶️</div>
+            <div class="logo-text">YouTube PWA</div>
+        </div>
+        <button id="installButton" class="install-btn">Install App</button>
+    </header>
+    
+    <div class="container">
+        <div class="search-bar">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput"
+                placeholder="Search YouTube or enter URL..."
+                onkeypress="handleSearch(event)"
+            >
+        </div>
+        
+        <div class="iframe-container">
+            <div class="loading" id="loading">Loading YouTube...</div>
+            <iframe 
+                id="youtubeFrame"
+                src="https://www.youtube.com/"
+                title="YouTube"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
 
     <script>
-      // Register service worker for PWA support
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("/sw.js")
-            .catch((err) => console.error("SW registration failed", err));
-        });
-      }
-
-      // When opened as installed app (standalone), redirect to mobile YouTube
-      window.addEventListener("load", () => {
-        const isStandalone =
-          window.matchMedia("(display-mode: standalone)").matches ||
-          window.navigator.standalone === true;
-
-        if (isStandalone) {
-          window.location.replace("https://m.youtube.com/");
+        // DOM Elements
+        const youtubeFrame = document.getElementById('youtubeFrame');
+        const loading = document.getElementById('loading');
+        const installButton = document.getElementById('installButton');
+        const searchInput = document.getElementById('searchInput');
+        const notification = document.getElementById('notification');
+        
+        // Show notification
+        function showNotification(message, duration = 3000) {
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, duration);
         }
-      });
+        
+        // Handle search
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const query = searchInput.value.trim();
+                if (query) {
+                    // Check if it's a URL
+                    if (query.startsWith('http://') || query.startsWith('https://')) {
+                        youtubeFrame.src = query;
+                    } else if (query.includes('youtube.com') || query.includes('youtu.be')) {
+                        youtubeFrame.src = query.startsWith('http') ? query : 'https://' + query;
+                    } else {
+                        // Search YouTube
+                        youtubeFrame.src = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+                    }
+                    loading.style.display = 'block';
+                }
+            }
+        }
+        
+        // Iframe load handler
+        youtubeFrame.addEventListener('load', () => {
+            loading.style.display = 'none';
+        });
+        
+        // PWA Installation
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+            
+            installButton.addEventListener('click', () => {
+                installButton.style.display = 'none';
+                deferredPrompt.prompt();
+                
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showNotification('YouTube PWA installed successfully!');
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        });
+        
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+        
+        // Detect if app is running as PWA
+        window.addEventListener('appinstalled', () => {
+            installButton.style.display = 'none';
+            showNotification('Welcome to YouTube PWA!');
+        });
+        
+        // Check if already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            installButton.style.display = 'none';
+        }
     </script>
-  </head>
-  <body>
-    <main class="card">
-      <div class="badge">
-        <span class="dot"></span>
-        <span>PWA Wrapper</span>
-      </div>
-      <h1>YouTube Web App</h1>
-      <p>
-        Lightweight Progressive Web App that opens
-        <strong>YouTube</strong> in its own app-like window.
-      </p>
-      <p class="hint">
-        On Android Chrome:<br />
-        open this site → tap <strong>⋮</strong> menu → choose
-        <strong>Install app</strong> or <strong>Add to Home screen</strong>.
-      </p>
-    </main>
-  </body>
+</body>
 </html>

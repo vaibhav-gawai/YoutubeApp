@@ -1,16 +1,42 @@
-// Minimal service worker just to make the PWA installable
+const CACHE_NAME = 'youtube-pwa-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/manifest.json'
+];
 
-self.addEventListener("install", (event) => {
-  // Activate immediately after installation
-  self.skipWaiting();
+// Install event
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
+  );
 });
 
-self.addEventListener("activate", (event) => {
-  // Take control immediately
-  event.waitUntil(self.clients.claim());
+// Activate event
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
 });
 
-// No special caching for now – let the network handle everything
-self.addEventListener("fetch", (event) => {
-  // You could add caching logic here later if you want
+// Fetch event
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Return cached version or fetch from network
+        return response || fetch(event.request);
+      })
+  );
 });
