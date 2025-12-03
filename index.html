@@ -1,84 +1,125 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>YouTube Web App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#000000" />
+  <head>
+    <meta charset="utf-8" />
+    <title>YouTube Web App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
 
-  <!-- PWA manifest -->
-  <link rel="manifest" href="manifest.webmanifest" />
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json" />
 
-  <!-- Basic styles -->
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    body {
-      background: #000;
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 1.5rem;
-    }
-    .card {
-      max-width: 420px;
-    }
-    h1 {
-      font-size: 1.6rem;
-      margin-bottom: 0.75rem;
-    }
-    p {
-      opacity: 0.8;
-      margin-bottom: 0.75rem;
-      line-height: 1.4;
-    }
-    .hint {
-      font-size: 0.9rem;
-      opacity: 0.6;
-      margin-top: 0.75rem;
-    }
-  </style>
+    <!-- Optional icons for better install UX -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
-  <script>
-    // Register service worker for PWA installability
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/sw.js')
-          .catch(err => console.error('SW registration failed', err));
-      });
-    }
-
-    // When opened as installed app, redirect to YouTube
-    window.addEventListener('load', () => {
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true;
-
-      if (isStandalone) {
-        // Open mobile YouTube
-        window.location.replace('https://m.youtube.com/');
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
-    });
-  </script>
-</head>
-<body>
-  <main class="card">
-    <h1>YouTube Web App</h1>
-    <p>
-      This is a lightweight PWA wrapper for YouTube.<br />
-      Install it on your Android device to open YouTube in its own app-like window.
-    </p>
-    <p class="hint">
-      In Chrome on Android: open this site → menu (⋮) → <b>Install app</b> or <b>Add to Home screen</b>.
-    </p>
-  </main>
-</body>
+
+      body {
+        background: radial-gradient(circle at top, #202020 0, #000 55%);
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+
+      .card {
+        max-width: 420px;
+        width: 100%;
+        text-align: center;
+        padding: 1.75rem 1.5rem;
+        border-radius: 1.25rem;
+        background: rgba(20, 20, 20, 0.9);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      h1 {
+        font-size: 1.7rem;
+        margin-bottom: 0.6rem;
+      }
+
+      p {
+        opacity: 0.85;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+        font-size: 0.98rem;
+      }
+
+      .hint {
+        font-size: 0.86rem;
+        opacity: 0.65;
+        margin-top: 0.4rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        padding: 0.25rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        margin-bottom: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 999px;
+        background: #ff0000;
+      }
+    </style>
+
+    <script>
+      // Register service worker for PWA support
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .catch((err) => console.error("SW registration failed", err));
+        });
+      }
+
+      // When opened as installed app (standalone), redirect to mobile YouTube
+      window.addEventListener("load", () => {
+        const isStandalone =
+          window.matchMedia("(display-mode: standalone)").matches ||
+          window.navigator.standalone === true;
+
+        if (isStandalone) {
+          window.location.replace("https://m.youtube.com/");
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <main class="card">
+      <div class="badge">
+        <span class="dot"></span>
+        <span>PWA Wrapper</span>
+      </div>
+      <h1>YouTube Web App</h1>
+      <p>
+        Lightweight Progressive Web App that opens
+        <strong>YouTube</strong> in its own app-like window.
+      </p>
+      <p class="hint">
+        On Android Chrome:<br />
+        open this site → tap <strong>⋮</strong> menu → choose
+        <strong>Install app</strong> or <strong>Add to Home screen</strong>.
+      </p>
+    </main>
+  </body>
 </html>

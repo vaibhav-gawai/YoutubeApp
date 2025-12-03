@@ -1,17 +1,16 @@
 // Minimal service worker just to make the PWA installable
 
-self.addEventListener('install', event => {
+self.addEventListener("install", (event) => {
   // Activate immediately after installation
   self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
-  // Take control of open pages
+self.addEventListener("activate", (event) => {
+  // Take control immediately
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('fetch', event => {
-  // For this wrapper we don't cache aggressively.
-  // Just let the network handle everything.
-  return; // no-op
+// No special caching for now – let the network handle everything
+self.addEventListener("fetch", (event) => {
+  // You could add caching logic here later if you want
 });
