@@ -1,21 +1,31 @@
-// Simple Service Worker - Just enough for PWA install
-const CACHE_NAME = 'youtube-pwa-minimal';
+// Simple Service Worker for PWA
+const CACHE_NAME = 'youtube-pwa-v1';
 
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
-  // Skip waiting to activate immediately
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll([
+          '/',
+          '/index.html',
+          '/manifest.json'
+        ]);
+      })
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
   console.log('Service Worker: Activated');
-  // Take control of all clients
   event.waitUntil(clients.claim());
 });
 
-// Very basic fetch handling
 self.addEventListener('fetch', (event) => {
-  // Don't cache or intercept anything - just pass through
-  // This minimal approach works better for our use case
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        return response || fetch(event.request);
+      })
+  );
 });

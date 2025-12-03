@@ -15,28 +15,11 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #000;
             color: white;
             height: 100vh;
             overflow: hidden;
-        }
-        
-        /* YouTube Container - Shows when installed */
-        #youtubeContainer {
-            width: 100%;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 10;
-        }
-        
-        #youtubeFrame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #000;
         }
         
         /* Install Screen - Shows when not installed */
@@ -50,10 +33,6 @@
             padding: 20px;
             text-align: center;
             background: #000;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 20;
         }
         
         .logo {
@@ -157,24 +136,40 @@
         .hidden {
             display: none !important;
         }
+        
+        /* Already installed - redirect screen */
+        .redirect-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 40;
+        }
+        
+        .redirect-logo {
+            font-size: 80px;
+            color: #ff0000;
+            margin-bottom: 20px;
+        }
+        
+        .redirect-text {
+            color: #aaa;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <!-- Loading Screen -->
     <div class="loading" id="loadingScreen">
         <div class="spinner"></div>
-        <div class="loading-text">Loading...</div>
-    </div>
-    
-    <!-- YouTube Container (shown when installed) -->
-    <div id="youtubeContainer" class="hidden">
-        <iframe 
-            id="youtubeFrame"
-            src="https://m.youtube.com"
-            title="YouTube"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen>
-        </iframe>
+        <div class="loading-text" id="loadingText">Loading...</div>
     </div>
     
     <!-- Install Screen (shown when not installed) -->
@@ -182,7 +177,8 @@
         <div class="logo">▶️</div>
         <h1>YouTube</h1>
         <div class="subtitle">
-            Install YouTube as an app for the best experience with Brave Browser's ad-blocking
+            Install YouTube as an app for the best experience<br>
+            with Brave Browser's ad-blocking
         </div>
         
         <button id="installBtn" class="install-btn">
@@ -194,22 +190,30 @@
             Opening in Brave Browser...
         </div>
     </div>
+    
+    <!-- Redirect Screen (shown briefly when installed) -->
+    <div id="redirectScreen" class="redirect-screen hidden">
+        <div class="redirect-logo">▶️</div>
+        <div class="redirect-text" id="redirectText">Opening YouTube...</div>
+        <div class="spinner"></div>
+    </div>
 
     <script>
         // DOM Elements
         const loadingScreen = document.getElementById('loadingScreen');
-        const youtubeContainer = document.getElementById('youtubeContainer');
+        const loadingText = document.getElementById('loadingText');
         const installScreen = document.getElementById('installScreen');
         const installBtn = document.getElementById('installBtn');
         const statusMessage = document.getElementById('statusMessage');
-        const youtubeFrame = document.getElementById('youtubeFrame');
+        const redirectScreen = document.getElementById('redirectScreen');
+        const redirectText = document.getElementById('redirectText');
         
         let deferredPrompt = null;
         let isInstalled = false;
         
-        // Check if already installed (PWA in standalone mode)
+        // Check if app is installed (running in standalone mode)
         function checkIfInstalled() {
-            // Check multiple ways to detect PWA installation
+            // Multiple ways to detect PWA
             if (window.matchMedia('(display-mode: standalone)').matches) {
                 return true;
             }
@@ -223,8 +227,14 @@
                 return true;
             }
             
-            // Check for Chrome Android intent
+            // Check for Chrome Android
             if ('standalone' in navigator && navigator.standalone === true) {
+                return true;
+            }
+            
+            // Check URL parameters (for debugging)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('installed') || urlParams.has('pwa')) {
                 return true;
             }
             
@@ -237,54 +247,46 @@
             
             isInstalled = checkIfInstalled();
             
-            // Show appropriate screen based on installation status
-            if (isInstalled) {
-                console.log('✅ App is installed - opening YouTube');
-                showYouTube();
-            } else {
-                console.log('📱 App not installed - showing install screen');
-                showInstallScreen();
-            }
-            
             // Hide loading screen
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
+                
+                if (isInstalled) {
+                    console.log('✅ App is installed - redirecting to YouTube');
+                    redirectToYouTube();
+                } else {
+                    console.log('📱 App not installed - showing install screen');
+                    showInstallScreen();
+                }
             }, 500);
-        }
-        
-        // Show YouTube directly
-        function showYouTube() {
-            youtubeContainer.classList.remove('hidden');
-            installScreen.classList.add('hidden');
-            
-            // Auto-focus the iframe for better UX
-            setTimeout(() => {
-                youtubeFrame.focus();
-            }, 1000);
-            
-            // YouTube might block embedding, so we can try to handle that
-            youtubeFrame.addEventListener('load', () => {
-                console.log('YouTube loaded successfully');
-            });
-            
-            youtubeFrame.addEventListener('error', () => {
-                console.log('Failed to load YouTube in iframe');
-                // Fallback: redirect to YouTube
-                window.location.href = 'https://m.youtube.com';
-            });
         }
         
         // Show install screen
         function showInstallScreen() {
-            youtubeContainer.classList.add('hidden');
             installScreen.classList.remove('hidden');
             
             // Check if we're in Brave Browser
-            const isBrave = navigator.brave && navigator.brave.isBrave ? true : false;
+            const isBrave = navigator.brave && (typeof navigator.brave.isBrave === 'function' || navigator.brave.isBrave);
             if (isBrave) {
                 statusMessage.textContent = 'Using Brave Browser ✓ (Ads will be blocked)';
                 statusMessage.style.color = '#00c853';
+            } else {
+                statusMessage.textContent = 'For best experience, use Brave Browser to block ads';
+                statusMessage.style.color = '#ffa500';
             }
+        }
+        
+        // Redirect to YouTube (when app is installed)
+        function redirectToYouTube() {
+            redirectScreen.classList.remove('hidden');
+            redirectText.textContent = 'Opening YouTube...';
+            
+            // Wait 1 second then redirect
+            setTimeout(() => {
+                console.log('Redirecting to YouTube...');
+                // Force new tab in standalone mode
+                window.location.href = 'https://m.youtube.com';
+            }, 1000);
         }
         
         // Listen for PWA install prompt
@@ -313,13 +315,13 @@
                     statusMessage.textContent = 'App will open automatically after installation';
                 } else {
                     console.log('❌ User dismissed install');
-                    statusMessage.textContent = 'Installation cancelled. The app will still work in browser.';
+                    statusMessage.textContent = 'Installation cancelled. Opening YouTube...';
                     statusMessage.style.color = '#ff4444';
                     
-                    // Option: redirect to YouTube after 2 seconds
+                    // If user cancels, open YouTube directly
                     setTimeout(() => {
                         window.location.href = 'https://m.youtube.com';
-                    }, 2000);
+                    }, 1500);
                 }
                 
                 deferredPrompt = null;
@@ -334,46 +336,22 @@
         window.addEventListener('appinstalled', () => {
             console.log('🎉 PWA was successfully installed');
             
-            // Show success message briefly, then reload to open in PWA mode
+            // Show success message
             installBtn.innerHTML = '<span class="install-icon">✅</span> Installed Successfully!';
             statusMessage.textContent = 'App installed! Opening YouTube...';
             statusMessage.style.color = '#00c853';
             
-            // Reload the page to trigger PWA mode detection
+            // Reload the page to trigger installed mode
             setTimeout(() => {
-                window.location.reload();
+                window.location.href = window.location.origin + '?installed=true';
             }, 1500);
         });
         
-        // Handle iframe navigation (if YouTube tries to navigate within iframe)
-        youtubeFrame.addEventListener('load', () => {
-            // You can add additional logic here if needed
-        });
-        
-        // Handle keyboard shortcuts for installed app
-        document.addEventListener('keydown', (e) => {
-            // Only in installed mode
-            if (isInstalled) {
-                // Escape key - go back in iframe history
-                if (e.key === 'Escape') {
-                    if (youtubeFrame.contentWindow && youtubeFrame.contentWindow.history.length > 1) {
-                        youtubeFrame.contentWindow.history.back();
-                    }
-                }
-                
-                // F5 or Ctrl+R - refresh
-                if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
-                    e.preventDefault();
-                    youtubeFrame.contentWindow.location.reload();
-                }
-            }
-        });
-        
-        // Handle visibility changes (when user returns to app)
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && isInstalled) {
-                // Refocus iframe when returning to app
-                youtubeFrame.focus();
+        // Handle back/forward navigation
+        window.addEventListener('pageshow', (event) => {
+            // If we're coming back from YouTube, check if we need to show install screen
+            if (event.persisted || performance.getEntriesByType("navigation")[0]?.type === 'back_forward') {
+                initApp();
             }
         });
         
@@ -390,8 +368,21 @@
             }
         }
         
+        // Check if we should auto-redirect (for debugging)
+        function checkAutoRedirect() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('redirect')) {
+                window.location.href = 'https://m.youtube.com';
+                return true;
+            }
+            return false;
+        }
+        
         // Initialize everything when page loads
         window.addEventListener('load', () => {
+            // Check for auto-redirect first
+            if (checkAutoRedirect()) return;
+            
             // Register service worker
             registerServiceWorker();
             
@@ -407,9 +398,10 @@
             }
         }, 5000);
         
-        // Debug info (remove in production)
+        // Debug info
         console.log('User Agent:', navigator.userAgent);
-        console.log('Is Brave:', navigator.brave ? 'Yes' : 'No');
+        console.log('Is Mobile:', /Mobi|Android/i.test(navigator.userAgent));
+        console.log('Display Mode:', window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser');
     </script>
 </body>
 </html>
