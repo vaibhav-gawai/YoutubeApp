@@ -1,5 +1,6 @@
 {
   "name": "YouTube Web App",
+  "id":"/",
   "short_name": "YouTube",
   "start_url": "/",
   "scope": "/",
@@ -20,3 +21,4 @@
     }
   ]
 }
+
