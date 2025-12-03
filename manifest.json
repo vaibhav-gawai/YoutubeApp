@@ -1,22 +1,83 @@
 {
-  "name": "YouTube Ad-Free",
+  "name": "YouTube PWA",
   "short_name": "YouTube",
-  "description": "YouTube with Brave ad-blocking",
+  "description": "Ad-Free YouTube with Brave Browser",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#000000",
   "theme_color": "#ff0000",
   "orientation": "any",
+  "scope": "/",
+  "id": "/",
+  "categories": ["entertainment", "music", "video"],
+  "launch_handler": {
+    "client_mode": "navigate-new"
+  },
   "icons": [
     {
-      "src": "https://www.youtube.com/s/desktop/12d6b690/img/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "https://www.youtube.com/s/desktop/12d6b690/img/favicon_32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "https://www.youtube.com/s/desktop/12d6b690/img/icon_512x512.png",
+      "src": "https://www.youtube.com/s/desktop/12d6b690/img/favicon_48x48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://www.youtube.com/s/desktop/12d6b690/img/favicon_96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://www.youtube.com/s/desktop/12d6b690/img/favicon_144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://www.youtube.com/s/desktop/12d6b690/img/favicon_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://www.youtube.com/s/desktop/12d6b690/img/favicon_512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "YouTube Mobile",
+      "short_name": "Mobile",
+      "description": "Open YouTube Mobile",
+      "url": "https://m.youtube.com",
+      "icons": [
+        {
+          "src": "https://www.youtube.com/s/desktop/12d6b690/img/favicon_96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "YouTube Music",
+      "short_name": "Music",
+      "description": "Open YouTube Music",
+      "url": "https://music.youtube.com",
+      "icons": [
+        {
+          "src": "https://www.youtube.com/s/desktop/12d6b690/img/favicon_96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
