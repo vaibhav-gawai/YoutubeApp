@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube PWA</title>
-    <meta name="description" content="YouTube Progressive Web App">
     <meta name="theme-color" content="#ff0000">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="icon" href="https://www.youtube.com/s/desktop/12d6b690/img/favicon.ico">
     <style>
         * {
             margin: 0;
@@ -17,246 +15,213 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f9f9f9;
+            font-family: Arial, sans-serif;
+            background: #0f0f0f;
+            color: white;
             height: 100vh;
             display: flex;
-            flex-direction: column;
-        }
-        
-        header {
-            background: #ff0000;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .logo-icon {
-            font-size: 24px;
-        }
-        
-        .logo-text {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        
-        .install-btn {
-            margin-left: auto;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            display: none;
-        }
-        
-        .install-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            text-align: center;
+            padding: 20px;
         }
         
         .container {
-            flex: 1;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        h1 {
+            color: #ff0000;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+        
+        .options {
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            gap: 15px;
+            margin-bottom: 30px;
         }
         
-        .search-bar {
-            padding: 15px;
-            background: white;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 24px;
-            font-size: 16px;
-            outline: none;
-        }
-        
-        .search-input:focus {
-            border-color: #ff0000;
-        }
-        
-        .iframe-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-        }
-        
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 18px;
-            color: #666;
-        }
-        
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
+        .btn {
+            display: block;
+            background: #272727;
             color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: none;
-            z-index: 1000;
+            padding: 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
         }
         
-        @media (max-width: 768px) {
-            .logo-text {
-                font-size: 18px;
-            }
-            
-            header {
-                padding: 12px 15px;
-            }
+        .btn:hover, .btn:active {
+            background: #ff0000;
+            border-color: #ff0000;
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: #ff0000;
+        }
+        
+        .btn-primary:hover, .btn-primary:active {
+            background: #cc0000;
+        }
+        
+        .info {
+            background: rgba(255, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #ff0000;
+        }
+        
+        .info-title {
+            color: #ff0000;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .info-text {
+            color: #ccc;
+            font-size: 14px;
+        }
+        
+        #installBtn {
+            margin-top: 20px;
+            display: none;
+            background: #3ea6ff;
+            color: #0f0f0f;
+            font-weight: bold;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 600px) {
+            .logo { font-size: 60px; }
+            h1 { font-size: 24px; }
+            .btn { padding: 15px; font-size: 16px; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <div class="logo-icon">▶️</div>
-            <div class="logo-text">YouTube PWA</div>
-        </div>
-        <button id="installButton" class="install-btn">Install App</button>
-    </header>
-    
     <div class="container">
-        <div class="search-bar">
-            <input 
-                type="text" 
-                class="search-input" 
-                id="searchInput"
-                placeholder="Search YouTube or enter URL..."
-                onkeypress="handleSearch(event)"
-            >
+        <div class="logo">▶️</div>
+        <h1>YouTube PWA (Ad-Free)</h1>
+        
+        <div class="subtitle">
+            Open YouTube through Brave Browser to enjoy ad-free experience.<br>
+            Select your preferred YouTube version:
         </div>
         
-        <div class="iframe-container">
-            <div class="loading" id="loading">Loading YouTube...</div>
-            <iframe 
-                id="youtubeFrame"
-                src="https://www.youtube.com/"
-                title="YouTube"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-            </iframe>
+        <div class="options">
+            <a href="https://m.youtube.com" target="_blank" class="btn btn-primary" id="mobileBtn">
+                Open YouTube Mobile
+            </a>
+            
+            <a href="https://www.youtube.com" target="_blank" class="btn" id="desktopBtn">
+                Open YouTube Desktop
+            </a>
+            
+            <a href="https://music.youtube.com" target="_blank" class="btn" id="musicBtn">
+                Open YouTube Music
+            </a>
+        </div>
+        
+        <button id="installBtn" class="btn">
+            📱 Install as App
+        </button>
+        
+        <div class="info">
+            <div class="info-title">How it works:</div>
+            <div class="info-text">
+                1. Make sure you're using <strong>Brave Browser</strong><br>
+                2. Click any option above to open YouTube<br>
+                3. YouTube will open in a new tab with ads blocked<br>
+                4. Install this PWA for quick access (using button above)
+            </div>
         </div>
     </div>
-    
-    <div class="notification" id="notification"></div>
 
     <script>
-        // DOM Elements
-        const youtubeFrame = document.getElementById('youtubeFrame');
-        const loading = document.getElementById('loading');
-        const installButton = document.getElementById('installButton');
-        const searchInput = document.getElementById('searchInput');
-        const notification = document.getElementById('notification');
-        
-        // Show notification
-        function showNotification(message, duration = 3000) {
-            notification.textContent = message;
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, duration);
-        }
-        
-        // Handle search
-        function handleSearch(event) {
-            if (event.key === 'Enter') {
-                const query = searchInput.value.trim();
-                if (query) {
-                    // Check if it's a URL
-                    if (query.startsWith('http://') || query.startsWith('https://')) {
-                        youtubeFrame.src = query;
-                    } else if (query.includes('youtube.com') || query.includes('youtu.be')) {
-                        youtubeFrame.src = query.startsWith('http') ? query : 'https://' + query;
-                    } else {
-                        // Search YouTube
-                        youtubeFrame.src = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+        // Make all buttons open in same tab for PWA experience
+        document.querySelectorAll('.btn').forEach(btn => {
+            if (btn.tagName === 'A') {
+                btn.addEventListener('click', function(e) {
+                    // For PWA, open in same window
+                    if (window.matchMedia('(display-mode: standalone)').matches) {
+                        e.preventDefault();
+                        window.location.href = this.href;
                     }
-                    loading.style.display = 'block';
-                }
+                });
             }
-        }
-        
-        // Iframe load handler
-        youtubeFrame.addEventListener('load', () => {
-            loading.style.display = 'none';
         });
         
         // PWA Installation
         let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
         
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installButton.style.display = 'block';
+            installBtn.style.display = 'block';
             
-            installButton.addEventListener('click', () => {
-                installButton.style.display = 'none';
+            installBtn.addEventListener('click', async () => {
+                installBtn.style.display = 'none';
                 deferredPrompt.prompt();
                 
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        showNotification('YouTube PWA installed successfully!');
-                    }
-                    deferredPrompt = null;
-                });
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('PWA installed');
+                }
+                deferredPrompt = null;
             });
         });
         
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registered:', registration);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker registration failed:', error);
-                    });
-            });
+        // If already installed, hide install button
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            installBtn.style.display = 'none';
         }
         
-        // Detect if app is running as PWA
-        window.addEventListener('appinstalled', () => {
-            installButton.style.display = 'none';
-            showNotification('Welcome to YouTube PWA!');
-        });
-        
-        // Check if already installed
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            installButton.style.display = 'none';
+        // Open mobile version by default if on mobile
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            document.getElementById('mobileBtn').classList.add('btn-primary');
+            document.getElementById('desktopBtn').classList.remove('btn-primary');
         }
     </script>
+    <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        });
+    }
+</script>
 </body>
 </html>
