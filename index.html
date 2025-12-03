@@ -3,15 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube PWA</title>
+    <title>YouTube</title>
     <meta name="theme-color" content="#ff0000">
-    
-    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
-    
-    <!-- Icons -->
-    <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
-    <link rel="apple-touch-icon" href="icon-192.png">
     
     <style>
         * {
@@ -21,334 +15,401 @@
         }
         
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #000000, #1a1a1a);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #000;
             color: white;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* YouTube Container - Shows when installed */
+        #youtubeContainer {
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+        
+        #youtubeFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
+        
+        /* Install Screen - Shows when not installed */
+        #installScreen {
+            width: 100%;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
-        }
-        
-        .app-container {
-            max-width: 600px;
-            width: 100%;
             text-align: center;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            background: #000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 20;
         }
         
         .logo {
-            font-size: 100px;
-            margin-bottom: 20px;
+            font-size: 120px;
             color: #ff0000;
-            animation: bounce 2s infinite;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
         }
         
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
         
         h1 {
             color: #ff0000;
             font-size: 2.5em;
             margin-bottom: 10px;
-            background: linear-gradient(45deg, #ff0000, #ff6b6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
         
         .subtitle {
             color: #aaa;
             margin-bottom: 40px;
-            font-size: 1.1em;
+            font-size: 1.2em;
+            max-width: 400px;
             line-height: 1.5;
         }
         
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .primary-btn {
-            background: linear-gradient(45deg, #ff0000, #ff4757);
+        .install-btn {
+            background: linear-gradient(45deg, #ff0000, #ff4444);
             color: white;
             border: none;
-            padding: 18px;
-            border-radius: 15px;
-            font-size: 18px;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.5em;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
+            gap: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
         }
         
-        .primary-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(255, 0, 0, 0.3);
+        .install-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 0, 0, 0.4);
         }
         
-        .install-btn {
-            background: linear-gradient(45deg, #3ea6ff, #1e90ff);
-            color: black;
-            font-weight: bold;
-            animation: pulse 1.5s infinite;
-            margin-top: 20px;
+        .install-btn:active {
+            transform: translateY(-2px);
         }
         
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        .install-icon {
+            font-size: 1.8em;
         }
         
-        .install-btn.installed {
-            background: #00c853;
-            animation: none;
-        }
-        
-        .features {
-            background: rgba(255, 0, 0, 0.1);
-            border-radius: 15px;
-            padding: 20px;
+        .status-message {
             margin-top: 30px;
-            text-align: left;
-            border-left: 4px solid #ff0000;
+            color: #3ea6ff;
+            font-size: 0.9em;
+            opacity: 0.8;
         }
         
-        .features h3 {
-            color: #ff0000;
-            margin-bottom: 10px;
+        /* Loading screen */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
         }
         
-        .features ul {
-            list-style: none;
-            padding-left: 0;
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #333;
+            border-top: 4px solid #ff0000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
         
-        .features li {
-            padding: 5px 0;
-            color: #ccc;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
-        .features li:before {
-            content: "✓ ";
-            color: #ff0000;
-            font-weight: bold;
-        }
-        
-        .install-status {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            font-size: 14px;
+        .loading-text {
             color: #aaa;
+            font-size: 1em;
         }
         
-        @media (max-width: 600px) {
-            .app-container {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .logo {
-                font-size: 80px;
-            }
+        /* Hide elements */
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
+    <!-- Loading Screen -->
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+    
+    <!-- YouTube Container (shown when installed) -->
+    <div id="youtubeContainer" class="hidden">
+        <iframe 
+            id="youtubeFrame"
+            src="https://m.youtube.com"
+            title="YouTube"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+        </iframe>
+    </div>
+    
+    <!-- Install Screen (shown when not installed) -->
+    <div id="installScreen" class="hidden">
         <div class="logo">▶️</div>
-        <h1>YouTube PWA</h1>
+        <h1>YouTube</h1>
         <div class="subtitle">
-            Ad-Free YouTube Experience<br>
-            Powered by Brave Browser
+            Install YouTube as an app for the best experience with Brave Browser's ad-blocking
         </div>
         
-        <div class="action-buttons">
-            <a href="https://m.youtube.com" target="_blank" class="primary-btn">
-                <span style="font-size: 24px;">▶️</span>
-                Open YouTube Mobile
-            </a>
-            
-            <a href="https://www.youtube.com" target="_blank" class="primary-btn">
-                <span style="font-size: 24px;">💻</span>
-                Open YouTube Desktop
-            </a>
-            
-            <a href="https://music.youtube.com" target="_blank" class="primary-btn">
-                <span style="font-size: 24px;">🎵</span>
-                Open YouTube Music
-            </a>
-            
-            <button id="installBtn" class="primary-btn install-btn">
-                <span style="font-size: 24px;">📱</span>
-                INSTALL AS APP
-            </button>
-        </div>
+        <button id="installBtn" class="install-btn">
+            <span class="install-icon">📱</span>
+            Install YouTube App
+        </button>
         
-        <div class="features">
-            <h3>App Features:</h3>
-            <ul>
-                <li>No YouTube Ads (Brave Browser)</li>
-                <li>Fullscreen App Experience</li>
-                <li>Fast & Lightweight</li>
-                <li>Works Offline (partial)</li>
-                <li>Background Play Support</li>
-                <li>Android & iOS Compatible</li>
-            </ul>
-        </div>
-        
-        <div class="install-status" id="installStatus">
-            <strong>Status:</strong> Waiting for install prompt...
+        <div class="status-message" id="statusMessage">
+            Opening in Brave Browser...
         </div>
     </div>
 
     <script>
-        // Elements
+        // DOM Elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const youtubeContainer = document.getElementById('youtubeContainer');
+        const installScreen = document.getElementById('installScreen');
         const installBtn = document.getElementById('installBtn');
-        const installStatus = document.getElementById('installStatus');
+        const statusMessage = document.getElementById('statusMessage');
+        const youtubeFrame = document.getElementById('youtubeFrame');
         
         let deferredPrompt = null;
         let isInstalled = false;
         
-        // Check if already installed
-        if (window.matchMedia('(display-mode: standalone)').matches || 
-            window.navigator.standalone === true) {
-            isInstalled = true;
-            updateInstallStatus();
+        // Check if already installed (PWA in standalone mode)
+        function checkIfInstalled() {
+            // Check multiple ways to detect PWA installation
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                return true;
+            }
+            if (window.navigator.standalone === true) {
+                return true;
+            }
+            if (window.matchMedia('(display-mode: fullscreen)').matches) {
+                return true;
+            }
+            if (window.matchMedia('(display-mode: minimal-ui)').matches) {
+                return true;
+            }
+            
+            // Check for Chrome Android intent
+            if ('standalone' in navigator && navigator.standalone === true) {
+                return true;
+            }
+            
+            return false;
         }
         
-        // Listen for beforeinstallprompt event
+        // Initialize app
+        function initApp() {
+            console.log('Initializing YouTube PWA...');
+            
+            isInstalled = checkIfInstalled();
+            
+            // Show appropriate screen based on installation status
+            if (isInstalled) {
+                console.log('✅ App is installed - opening YouTube');
+                showYouTube();
+            } else {
+                console.log('📱 App not installed - showing install screen');
+                showInstallScreen();
+            }
+            
+            // Hide loading screen
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+            }, 500);
+        }
+        
+        // Show YouTube directly
+        function showYouTube() {
+            youtubeContainer.classList.remove('hidden');
+            installScreen.classList.add('hidden');
+            
+            // Auto-focus the iframe for better UX
+            setTimeout(() => {
+                youtubeFrame.focus();
+            }, 1000);
+            
+            // YouTube might block embedding, so we can try to handle that
+            youtubeFrame.addEventListener('load', () => {
+                console.log('YouTube loaded successfully');
+            });
+            
+            youtubeFrame.addEventListener('error', () => {
+                console.log('Failed to load YouTube in iframe');
+                // Fallback: redirect to YouTube
+                window.location.href = 'https://m.youtube.com';
+            });
+        }
+        
+        // Show install screen
+        function showInstallScreen() {
+            youtubeContainer.classList.add('hidden');
+            installScreen.classList.remove('hidden');
+            
+            // Check if we're in Brave Browser
+            const isBrave = navigator.brave && navigator.brave.isBrave ? true : false;
+            if (isBrave) {
+                statusMessage.textContent = 'Using Brave Browser ✓ (Ads will be blocked)';
+                statusMessage.style.color = '#00c853';
+            }
+        }
+        
+        // Listen for PWA install prompt
         window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('✅ beforeinstallprompt event fired!');
+            console.log('✅ Install prompt available');
             e.preventDefault();
             deferredPrompt = e;
             
-            // Update UI to show install is available
-            installBtn.style.display = 'flex';
-            installStatus.innerHTML = '<strong>Status:</strong> ✅ Install prompt available! Tap "INSTALL AS APP" button above.';
-            
-            // Force show install button after 3 seconds
-            setTimeout(() => {
-                installBtn.style.display = 'flex';
-            }, 3000);
+            // Update install button
+            installBtn.innerHTML = '<span class="install-icon">📱</span> Install YouTube App';
+            statusMessage.textContent = 'Tap to install YouTube as an app';
+            statusMessage.style.color = '#3ea6ff';
         });
         
         // Handle install button click
         installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) {
-                showManualInstructions();
-                return;
-            }
-            
-            // Show the install prompt
-            deferredPrompt.prompt();
-            
-            // Wait for the user to respond to the prompt
-            const choiceResult = await deferredPrompt.userChoice;
-            
-            if (choiceResult.outcome === 'accepted') {
-                console.log('✅ User accepted the install prompt');
-                installBtn.innerHTML = '<span style="font-size: 24px;">✅</span> APP INSTALLED';
-                installBtn.classList.add('installed');
-                installStatus.innerHTML = '<strong>Status:</strong> ✅ App installed! Find it on your home screen.';
-                isInstalled = true;
-            } else {
-                console.log('❌ User dismissed the install prompt');
-                installStatus.innerHTML = '<strong>Status:</strong> ❌ Installation cancelled. Try again or use browser menu.';
-            }
-            
-            deferredPrompt = null;
-        });
-        
-        // Detect when app is successfully installed
-        window.addEventListener('appinstalled', () => {
-            console.log('✅ PWA was installed');
-            isInstalled = true;
-            updateInstallStatus();
-        });
-        
-        function updateInstallStatus() {
-            if (isInstalled) {
-                installBtn.innerHTML = '<span style="font-size: 24px;">✅</span> ALREADY INSTALLED';
-                installBtn.classList.add('installed');
-                installStatus.innerHTML = '<strong>Status:</strong> ✅ App is already installed on your device.';
-            }
-        }
-        
-        function showManualInstructions() {
-            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-            const isBrave = navigator.brave && navigator.brave.isBrave();
-            
-            let message = '';
-            
-            if (isMobile && isBrave) {
-                message = 'On Brave Browser:\n1. Tap menu (⋮)\n2. Tap "Install YouTube PWA"\n3. Tap "Install"';
-            } else if (isMobile) {
-                message = 'Tap browser menu (⋮) and look for "Install App" or "Add to Home Screen"';
-            } else {
-                message = 'Look for install icon (📱) in address bar or browser menu';
-            }
-            
-            alert(message);
-            installStatus.innerHTML = `<strong>Status:</strong> ${message.replace(/\n/g, '<br>')}`;
-        }
-        
-        // Register Service Worker
-        registerServiceWorker();
-        
-        function registerServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js')
-                        .then(registration => {
-                            console.log('✅ Service Worker registered:', registration);
-                            installStatus.innerHTML += '<br>✅ Service Worker: Active';
-                        })
-                        .catch(error => {
-                            console.log('❌ Service Worker registration failed:', error);
-                            installStatus.innerHTML += '<br>❌ Service Worker: Failed';
-                        });
-                });
-            }
-        }
-        
-        // Track user engagement (important for install prompt)
-        let engagementTime = 0;
-        setInterval(() => {
-            if (document.visibilityState === 'visible') {
-                engagementTime += 1;
-                console.log(`Engagement time: ${engagementTime}s`);
+            if (deferredPrompt) {
+                // Show native install prompt
+                deferredPrompt.prompt();
                 
-                // After 30 seconds of engagement, force check for install prompt
-                if (engagementTime === 30 && !deferredPrompt) {
-                    console.log('30 seconds engagement reached');
-                    installStatus.innerHTML = '<strong>Status:</strong> ✅ Ready to install. Button should appear soon.';
+                const choiceResult = await deferredPrompt.userChoice;
+                
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('✅ User accepted install');
+                    installBtn.innerHTML = '<span class="install-icon">✅</span> Installing...';
+                    statusMessage.textContent = 'App will open automatically after installation';
+                } else {
+                    console.log('❌ User dismissed install');
+                    statusMessage.textContent = 'Installation cancelled. The app will still work in browser.';
+                    statusMessage.style.color = '#ff4444';
+                    
+                    // Option: redirect to YouTube after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'https://m.youtube.com';
+                    }, 2000);
+                }
+                
+                deferredPrompt = null;
+            } else {
+                // No install prompt available, open YouTube directly
+                console.log('No install prompt, opening YouTube directly');
+                window.location.href = 'https://m.youtube.com';
+            }
+        });
+        
+        // Listen for successful installation
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 PWA was successfully installed');
+            
+            // Show success message briefly, then reload to open in PWA mode
+            installBtn.innerHTML = '<span class="install-icon">✅</span> Installed Successfully!';
+            statusMessage.textContent = 'App installed! Opening YouTube...';
+            statusMessage.style.color = '#00c853';
+            
+            // Reload the page to trigger PWA mode detection
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        });
+        
+        // Handle iframe navigation (if YouTube tries to navigate within iframe)
+        youtubeFrame.addEventListener('load', () => {
+            // You can add additional logic here if needed
+        });
+        
+        // Handle keyboard shortcuts for installed app
+        document.addEventListener('keydown', (e) => {
+            // Only in installed mode
+            if (isInstalled) {
+                // Escape key - go back in iframe history
+                if (e.key === 'Escape') {
+                    if (youtubeFrame.contentWindow && youtubeFrame.contentWindow.history.length > 1) {
+                        youtubeFrame.contentWindow.history.back();
+                    }
+                }
+                
+                // F5 or Ctrl+R - refresh
+                if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                    e.preventDefault();
+                    youtubeFrame.contentWindow.location.reload();
                 }
             }
-        }, 1000);
-        
-        // Add click events to increase engagement
-        document.addEventListener('click', () => {
-            console.log('User interaction detected');
         });
+        
+        // Handle visibility changes (when user returns to app)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && isInstalled) {
+                // Refocus iframe when returning to app
+                youtubeFrame.focus();
+            }
+        });
+        
+        // Register Service Worker for PWA capabilities
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ Service Worker registration failed:', error);
+                    });
+            }
+        }
+        
+        // Initialize everything when page loads
+        window.addEventListener('load', () => {
+            // Register service worker
+            registerServiceWorker();
+            
+            // Initialize app
+            setTimeout(initApp, 300);
+        });
+        
+        // Fallback: if still loading after 5 seconds, show appropriate screen
+        setTimeout(() => {
+            if (!loadingScreen.classList.contains('hidden')) {
+                loadingScreen.classList.add('hidden');
+                initApp();
+            }
+        }, 5000);
+        
+        // Debug info (remove in production)
+        console.log('User Agent:', navigator.userAgent);
+        console.log('Is Brave:', navigator.brave ? 'Yes' : 'No');
     </script>
 </body>
 </html>
