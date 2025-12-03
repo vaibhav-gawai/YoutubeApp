@@ -8,220 +8,178 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="https://www.youtube.com/s/desktop/12d6b690/img/favicon.ico">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
             font-family: Arial, sans-serif;
-            background: #0f0f0f;
+            text-align: center;
+            padding: 20px;
+            background: #000;
             color: white;
             height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
         }
         
         .container {
             max-width: 500px;
-            width: 100%;
+            margin: 0 auto;
         }
         
         .logo {
             font-size: 80px;
             margin-bottom: 20px;
-            animation: pulse 2s infinite;
+            color: #ff0000;
         }
         
         h1 {
             color: #ff0000;
             margin-bottom: 20px;
-            font-size: 28px;
-        }
-        
-        .subtitle {
-            color: #aaa;
-            margin-bottom: 40px;
-            line-height: 1.5;
-        }
-        
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
         }
         
         .btn {
             display: block;
-            background: #272727;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #ff0000;
             color: white;
-            padding: 18px;
-            border-radius: 12px;
-            text-decoration: none;
+            border: none;
+            border-radius: 10px;
             font-size: 18px;
-            font-weight: 500;
-            transition: all 0.3s;
-            border: 2px solid transparent;
             cursor: pointer;
+            text-decoration: none;
         }
         
-        .btn:hover, .btn:active {
-            background: #ff0000;
-            border-color: #ff0000;
-            transform: translateY(-2px);
-        }
-        
-        .btn-primary {
-            background: #ff0000;
-        }
-        
-        .btn-primary:hover, .btn-primary:active {
+        .btn:hover {
             background: #cc0000;
         }
         
+        #installBtn {
+            background: #3ea6ff;
+            color: #000;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+        
         .info {
-            background: rgba(255, 0, 0, 0.1);
+            background: #222;
             padding: 15px;
             border-radius: 10px;
             margin-top: 30px;
-            border-left: 4px solid #ff0000;
-        }
-        
-        .info-title {
-            color: #ff0000;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        .info-text {
-            color: #ccc;
+            text-align: left;
             font-size: 14px;
-        }
-        
-        #installBtn {
-            margin-top: 20px;
-            display: none;
-            background: #3ea6ff;
-            color: #0f0f0f;
-            font-weight: bold;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @media (max-width: 600px) {
-            .logo { font-size: 60px; }
-            h1 { font-size: 24px; }
-            .btn { padding: 15px; font-size: 16px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">▶️</div>
-        <h1>YouTube PWA (Ad-Free)</h1>
+        <h1>YouTube Ad-Free PWA</h1>
+        <p>Open this in Brave Browser for ad-free YouTube!</p>
         
-        <div class="subtitle">
-            Open YouTube through Brave Browser to enjoy ad-free experience.<br>
-            Select your preferred YouTube version:
-        </div>
+        <a href="https://m.youtube.com" target="_blank" class="btn">
+            Open YouTube Mobile
+        </a>
         
-        <div class="options">
-            <a href="https://m.youtube.com" target="_blank" class="btn btn-primary" id="mobileBtn">
-                Open YouTube Mobile
-            </a>
-            
-            <a href="https://www.youtube.com" target="_blank" class="btn" id="desktopBtn">
-                Open YouTube Desktop
-            </a>
-            
-            <a href="https://music.youtube.com" target="_blank" class="btn" id="musicBtn">
-                Open YouTube Music
-            </a>
-        </div>
+        <a href="https://www.youtube.com" target="_blank" class="btn">
+            Open YouTube Desktop
+        </a>
         
         <button id="installBtn" class="btn">
-            📱 Install as App
+            INSTALL APP (Click Here)
         </button>
         
         <div class="info">
-            <div class="info-title">How it works:</div>
-            <div class="info-text">
-                1. Make sure you're using <strong>Brave Browser</strong><br>
-                2. Click any option above to open YouTube<br>
-                3. YouTube will open in a new tab with ads blocked<br>
-                4. Install this PWA for quick access (using button above)
-            </div>
+            <h3>How to Install:</h3>
+            <ol>
+                <li>Open this page in <strong>Brave Browser</strong> on Android</li>
+                <li>Click "INSTALL APP" button above</li>
+                <li>Or use Brave menu → "Add to Home Screen"</li>
+                <li>Open installed app from home screen</li>
+                <li>Enjoy ad-free YouTube!</li>
+            </ol>
         </div>
     </div>
 
     <script>
-        // Make all buttons open in same tab for PWA experience
-        document.querySelectorAll('.btn').forEach(btn => {
-            if (btn.tagName === 'A') {
-                btn.addEventListener('click', function(e) {
-                    // For PWA, open in same window
-                    if (window.matchMedia('(display-mode: standalone)').matches) {
-                        e.preventDefault();
-                        window.location.href = this.href;
-                    }
-                });
-            }
-        });
-        
-        // PWA Installation
-        let deferredPrompt;
+        // FORCE SHOW INSTALL BUTTON
         const installBtn = document.getElementById('installBtn');
         
+        // Show button immediately
+        installBtn.style.display = 'block';
+        
+        // Track if we can install
+        let deferredPrompt = null;
+        
+        // Listen for beforeinstallprompt event
         window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('✅ beforeinstallprompt event fired!');
             e.preventDefault();
             deferredPrompt = e;
-            installBtn.style.display = 'block';
             
-            installBtn.addEventListener('click', async () => {
-                installBtn.style.display = 'none';
-                deferredPrompt.prompt();
-                
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('PWA installed');
-                }
-                deferredPrompt = null;
-            });
+            // Show install button
+            installBtn.style.display = 'block';
+            installBtn.textContent = '📱 INSTALL APP (Tap Here)';
+            
+            // Log for debugging
+            console.log('✅ Install prompt available');
         });
         
-        // If already installed, hide install button
+        // If app is already installed, hide button
         if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('📱 App is already installed');
             installBtn.style.display = 'none';
         }
         
-        // Open mobile version by default if on mobile
-        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            document.getElementById('mobileBtn').classList.add('btn-primary');
-            document.getElementById('desktopBtn').classList.remove('btn-primary');
+        // Handle install button click
+        installBtn.addEventListener('click', async () => {
+            console.log('🟡 Install button clicked');
+            
+            if (deferredPrompt) {
+                console.log('🟡 Showing install prompt');
+                deferredPrompt.prompt();
+                
+                const choiceResult = await deferredPrompt.userChoice;
+                console.log('🟡 User choice:', choiceResult.outcome);
+                
+                if (choiceResult.outcome === 'accepted') {
+                    installBtn.textContent = '✅ App Installed!';
+                    installBtn.style.background = '#00c853';
+                } else {
+                    installBtn.textContent = '❌ Installation Cancelled';
+                    installBtn.style.background = '#ff4444';
+                }
+                
+                deferredPrompt = null;
+            } else {
+                console.log('⚠️ No install prompt available');
+                
+                // Show manual installation instructions
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const isAndroid = /Android/.test(navigator.userAgent);
+                
+                if (isIOS) {
+                    alert('On iOS: Tap share button → "Add to Home Screen"');
+                } else if (isAndroid) {
+                    alert('On Android: Tap menu (⋮) → "Add to Home Screen"');
+                } else {
+                    alert('Check browser menu for "Install" or "Add to Home Screen" option');
+                }
+            }
+        });
+        
+        // Debug info
+        console.log('🔍 Debug Info:');
+        console.log('User Agent:', navigator.userAgent);
+        console.log('Is Brave:', navigator.brave && navigator.brave.isBrave());
+        console.log('Is HTTPS:', window.location.protocol === 'https:');
+        
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('✅ Service Worker registered:', reg))
+                .catch(err => console.log('❌ Service Worker failed:', err));
         }
     </script>
-    <script>
-    // Register Service Worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => {
-                    console.log('Service Worker registered:', registration);
-                })
-                .catch(error => {
-                    console.log('Service Worker registration failed:', error);
-                });
-        });
-    }
-</script>
 </body>
 </html>
